@@ -260,3 +260,62 @@ JOIN members mb
 WHERE DATEPART(month, order_date) = 1
 GROUP BY s.customer_id
 
+
+
+-- Bonus Questions 1
+
+SELECT 
+	s.customer_id,
+	order_date,
+	product_name,
+	price,
+	CASE 
+		WHEN order_date >= join_date
+			THEN 'Y'
+	ELSE 'N'
+	END AS member
+FROM sales s
+JOIN menu m
+	ON m.product_id = s.product_id
+JOIN members mb
+	ON mb.customer_id = s.customer_id
+
+
+-- Bonus Question 2
+
+WITH CTE AS
+(
+	SELECT 
+		s.customer_id,
+		s.order_date,
+		m.product_name,
+		m.price,
+		CASE 
+			WHEN s.order_date >= join_date
+				THEN 'Y'
+		ELSE 'N'
+		END AS member
+	FROM sales s
+	JOIN menu m
+		ON m.product_id = s.product_id
+	JOIN members mb
+		ON mb.customer_id = s.customer_id
+	--LEFT JOIN CTE 
+		--ON CTE.customer_id = s.customer_id
+)
+
+SELECT mb.customer_id,
+	order_date,
+	product_name,
+	price,
+	member,
+			CASE
+			WHEN order_date >= join_date
+				THEN  RANK() OVER(PARTITION BY mb.customer_id, member ORDER BY order_date)
+			WHEN member = 'N'
+				THEN NULL
+		ELSE NULL
+		END AS ranking
+FROM CTE
+JOIN members mb
+	ON mb.customer_id = CTE.customer_id
