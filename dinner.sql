@@ -248,13 +248,15 @@ GROUP BY customer_id
 SELECT s.customer_id,
 SUM(
 	CASE 
-		WHEN order_date BETWEEN join_date AND DATEADD('d', 6, join_date)
+		WHEN order_date BETWEEN join_date AND DATEADD(day, 6, join_date)
 		THEN price * 10 *2
 	ELSE price * 10
-	END) AS point,
+	END) AS point
 FROM menu m
 JOIN sales s
 	ON s.product_id = m.product_id
 JOIN members mb 
 	ON mb.customer_id = s.customer_id
+WHERE DATEPART(month, order_date) = 1
 GROUP BY s.customer_id
+
